@@ -14,19 +14,20 @@ do
   --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" \
   --query 'Instances[0].InstanceId' \
   --output text )
-  if [ $instance == "frontend" ]; then
+  
+  if [ "$instance" == "frontend" ]; then
      IP=$(
       aws ec2 describe-instances \
       --instance-ids $INSTANCE_ID \
-      --query 'Reservations[].Instances[].PublicIpAddress' \
+      --query 'Reservations[0].Instances[0].PublicIpAddress' \
       --output text
      )
      RECORD_NAME="$DOMAIN_NAME"
     else
    
-     ip=$(
+     IP=$(
       aws ec2 describe-instances \
-      --instance-ids $instance_id \
+      --instance-ids $INSTANCE_ID \
       --query 'Reservations[].Instances[].PrivateIpAddress' \
       --output text
      )
