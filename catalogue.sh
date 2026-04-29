@@ -59,7 +59,7 @@ npm install
 VALIDATE $? "Installing dependencies"
 
 cp catalogue.service /etc/systemd/system/catalogue.service
-VALIDATE $? "Created systemctl service"
+VALIDATE $? "Copying catalogue service file"
 
 systemctl daemon-reload
 systemctl enable catalogue 
