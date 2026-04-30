@@ -7,6 +7,8 @@ R="/e[31m"
 G="/e[32m"
 Y="/e[33m"
 N="/e[0m"
+SCRIPT_DIR=$PWD
+MONGODB_HOST=mongodb.narasimhadevops.online
 
 if [ $USERID -ne 0 ]; then 
    echo "$R Please run this script with root user access $N" | tee -a $LOGS_FILE
@@ -61,7 +63,7 @@ VALIDATE $? "Unzip catalogue code"
 npm install
 VALIDATE $? "Installing dependencies"
 
-cp catalogue.service /etc/systemd/system/catalogue.service
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
 VALIDATE $? "Copying catalogue service file"
 
 systemctl daemon-reload
@@ -69,3 +71,19 @@ systemctl enable catalogue
 systemctl start catalogue
 VALIDATE $? "Starting and enabling catalogue"
 
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
+dnf install mongodb-mongosh -y
+
+
+
+INDEX=$(mongosh --host $MONGODB_HOST --quiet  --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+
+if [ $INDEX -le 0 ]; then
+    mongosh --host $MONGODB_HOST </app/db/master-data.js
+    VALIDATE $? "Loading products"
+else
+    echo -e "Products already loaded ... $Y SKIPPING $N"
+fi
+
+systemctl restart catalogue
+VALIDATE $? "Restarting catalogue"
